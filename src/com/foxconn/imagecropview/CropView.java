@@ -1,53 +1,71 @@
 package com.foxconn.imagecropview;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 public class CropView extends FrameLayout {
-	
-	private ImageView cropShelter;
-	
+
+	private View cropShelter;
+
 	private ImageView bgSource;
+
+	private static final int NONE = 0;
+	private static final int SCALE_TOP = 1;
+	private static final int SCALE_BOTTOM = 6;
+	private static final int SCALE_LEFT = 2;
+	private static final int SCALE_RIGHT = 4;
+
+	private static final int SCALE_LEFT_TOP = 3;
+	private static final int SCALE_RIGHT_TOP = 5;
+	private static final int SCALE_LEFT_BOTTOM = 8;
+	private static final int SCALE_RIGHT_BOTTOM = 10;
+	private static final int CENTER_MOVE = 26;
 	
-	private static final String SCALE_LEFT_TOP="scale_left_top";
-	private static final String SCALE_RIGHT_TOP="scale_right_top";
-	private static final String SCALE_LEFT_BOTTOM="scale_left_bottom";
-	private static final String SCALE_RIGHT_BOTTOM="scale_right_bottom";
-	
-	
-	private String currentState = SCALE_LEFT_TOP;
-	
+	private float mRatio = 0.5f;
+
+	private static final int FINGER_RADIUS = 40;
+
+	private int currentState = NONE;
 
 	public CropView(Context context) {
 		super(context);
-		init(context,null);
+		init(context, null);
 	}
-
 
 	public CropView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init(context,attrs);
+		init(context, attrs);
 	}
-	
-	public void setResource(int drawable){
+
+	public void setResource(int drawable) {
 		this.bgSource.setImageResource(drawable);
 	}
 
 	private void init(Context context, AttributeSet attrs) {
 		this.bgSource = new ImageView(context);
-		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
+		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		lp.gravity = Gravity.CENTER;
 		this.bgSource.setLayoutParams(lp);
-		
-		
-		this.cropShelter = new ImageView(context){
-			private float mRatio=0.5f;
+
+		this.cropShelter = new View(context)
+		{
 
 			@Override
 			protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -79,57 +97,203 @@ public class CropView extends FrameLayout {
 				super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
 			}
-			
-		};
-		
-		
-		
+
+		}
+		;
+
 	}
-	
+
 	@Override
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 		this.addView(bgSource);
-		this.cropShelter.setImageResource(R.drawable.ic_crop_shelter);
-		
-		LayoutParams lp=new LayoutParams(400,LayoutParams.WRAP_CONTENT);
+		this.cropShelter.setBackgroundResource(R.drawable.ic_crop_shelter);
+
+		LayoutParams lp = new LayoutParams(400, LayoutParams.WRAP_CONTENT);
 		lp.gravity = Gravity.CENTER;
-		this.addView(cropShelter,lp);
+		this.addView(cropShelter, lp);
 	}
 	
-	
+	private int downX,downY,preMoveX,preMoveY;
+
+	private Canvas cavas;
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		float fingerRadius = getMeasuredWidth()/4f; 
-		if(event.getAction()==MotionEvent.ACTION_DOWN){
-			if(Math.sqrt(Math.pow(event.getX()-cropShelter.getLeft(), 2)+Math.pow(event.getY()-cropShelter.getTop(), 2))<=fingerRadius){
-				//leftTop
-				toast("leftTop");
-				this.currentState = SCALE_LEFT_TOP;
+
+		Rect outerRect = new Rect(cropShelter.getLeft() - FINGER_RADIUS, cropShelter.getTop() - FINGER_RADIUS,
+				cropShelter.getRight() + FINGER_RADIUS, cropShelter.getBottom() + FINGER_RADIUS);
+
+		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			downX = (int) event.getX();
+			downY = (int) event.getY();
+			
+			this.currentState = NONE;
+			if (outerRect.contains(downX, downY)) {
+				if (Math.abs(downY - cropShelter.getTop()) <= FINGER_RADIUS) {
+					this.currentState += SCALE_TOP;
+				}
+
+				if (Math.abs(downY - cropShelter.getBottom()) <= FINGER_RADIUS) {
+					this.currentState += SCALE_BOTTOM;
+				}
+
+				if (Math.abs(downX - cropShelter.getLeft()) <= FINGER_RADIUS) {
+					this.currentState += SCALE_LEFT;
+				}
+
+				if (Math.abs(downX - cropShelter.getRight()) <= FINGER_RADIUS) {
+					this.currentState += SCALE_RIGHT;
+				}
 				
-			}else if(Math.sqrt(Math.pow(event.getX()-cropShelter.getRight(), 2)+Math.pow(event.getY()-cropShelter.getTop(), 2))<=fingerRadius){
-				//rightTop
-				toast("rightTop");
-				this.currentState = SCALE_LEFT_TOP;
-			}else if(Math.sqrt(Math.pow(event.getX()-cropShelter.getLeft(), 2)+Math.pow(event.getY()-cropShelter.getBottom(), 2))<=fingerRadius){
-				//leftBottom
-				toast("leftBottom");
-				this.currentState = SCALE_LEFT_TOP;
-			}else if(Math.sqrt(Math.pow(event.getX()-cropShelter.getRight(), 2)+Math.pow(event.getY()-cropShelter.getBottom(), 2))<=fingerRadius){
-				//rightBottom
-				toast("rightBottom");
-				this.currentState = SCALE_LEFT_TOP;
+				Rect innerRect = new Rect(cropShelter.getLeft() + FINGER_RADIUS, cropShelter.getTop() + FINGER_RADIUS,
+						cropShelter.getRight() - FINGER_RADIUS, cropShelter.getBottom() - FINGER_RADIUS);
+				if (innerRect.contains(downX, downY)){
+					this.currentState += CENTER_MOVE;
+				}
+				test();
+
 			}
-//				else if(){
-//				
-//			}
+
 		}
 		
-		return super.onTouchEvent(event);
+		if (event.getAction() == MotionEvent.ACTION_MOVE) {
+			//點幾點在周圍，拉伸裁剪框
+			scale(event);
+			
+			//點幾點在中間 移動裁剪框
+			if(currentState == CENTER_MOVE){
+				if (preMoveX==0||preMoveY==0) {
+					
+					preMoveX=downX;
+					preMoveY = downY;
+				}
+				
+				float deltX=event.getX()-preMoveX;
+				float deltY=event.getY()-preMoveY;
+				
+				cropShelter.setLeft((int) (cropShelter.getLeft()+deltX));
+				cropShelter.setRight((int) (cropShelter.getRight()+deltX));
+				cropShelter.setTop((int) (cropShelter.getTop()+deltY));
+				cropShelter.setBottom((int) (cropShelter.getBottom()+deltY));
+				
+				preMoveX=(int) event.getX();
+				preMoveY=(int) event.getY();
+			}
+			
+		}
+		
+		if (MotionEvent.ACTION_UP==event.getAction()) {
+			preMoveX = 0 ;
+			preMoveY = 0 ;
+		}
+
+		return true;
 	}
-	
-	private void toast(String msg){
+
+	private void scale(MotionEvent event) {
+		if (currentState==SCALE_LEFT_TOP) {
+			cropShelter.setLeft((int)event.getX());
+			cropShelter.setTop((int) (cropShelter.getBottom()-((cropShelter.getRight()-cropShelter.getLeft())/mRatio)+0.5f));
+		}
+		
+		if (currentState==SCALE_RIGHT_TOP) {
+			cropShelter.setRight((int)event.getX());
+			cropShelter.setTop((int) (cropShelter.getBottom()-((cropShelter.getRight()-cropShelter.getLeft())/mRatio)+0.5f));
+		}
+		
+		if (currentState==SCALE_LEFT_BOTTOM) {
+			cropShelter.setLeft((int)event.getX());
+			cropShelter.setBottom((int) (cropShelter.getTop()+((cropShelter.getRight()-cropShelter.getLeft())/mRatio)+0.5f));
+		}
+		
+		if (currentState==SCALE_RIGHT_BOTTOM) {
+			cropShelter.setRight((int)event.getX());
+			cropShelter.setBottom((int) (cropShelter.getTop()+((cropShelter.getRight()-cropShelter.getLeft())/mRatio)+0.5f));
+		}
+		
+		if (currentState==SCALE_LEFT) {
+			int heightAfter=(int) ((cropShelter.getRight()-event.getX())/mRatio+0.5);
+			int heigtBefore = cropShelter.getBottom() - cropShelter.getTop();
+			int deltY= (int) ((heightAfter-heigtBefore)/2f+0.5);
+			cropShelter.setTop(cropShelter.getTop()-deltY);
+			cropShelter.setBottom((int) (cropShelter.getBottom()+deltY));
+			cropShelter.setLeft((int)event.getX());
+		}
+		
+		if (currentState==SCALE_RIGHT) {
+			int heightAfter=(int) ((event.getX()-cropShelter.getLeft())/mRatio+0.5);
+			int heigtBefore = cropShelter.getBottom() - cropShelter.getTop();
+			int deltY= (int) ((heightAfter-heigtBefore)/2f+0.5);
+			cropShelter.setTop(cropShelter.getTop()-deltY);
+			cropShelter.setBottom((int) (cropShelter.getBottom()+deltY));
+			cropShelter.setRight((int)event.getX());
+		}
+		
+		if (currentState==SCALE_TOP) {
+			int widthAfter=(int) ((cropShelter.getBottom()-event.getY())*mRatio+0.5);
+			int widthBefore = cropShelter.getRight() - cropShelter.getLeft();
+			int deltY= (int) ((widthAfter-widthBefore)/2f+0.5);
+			cropShelter.setLeft(cropShelter.getLeft()-deltY);
+			cropShelter.setRight((int) (cropShelter.getRight()+deltY));
+			cropShelter.setTop((int)event.getY());
+		}
+		
+		if (currentState==SCALE_BOTTOM) {
+			int widthAfter=(int) ((event.getY()-cropShelter.getTop())*mRatio+0.5);
+			int widthBefore = cropShelter.getRight() - cropShelter.getLeft();
+			int deltY= (int) ((widthAfter-widthBefore)/2f+0.5);
+			cropShelter.setLeft(cropShelter.getLeft()-deltY);
+			cropShelter.setRight((int) (cropShelter.getRight()+deltY));
+			cropShelter.setBottom((int)event.getY());
+		}
+	}
+
+	private void test() {
+//		toast("" + currentState);
+	}
+
+	private void toast(String msg) {
 		Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
 	}
+	
+	public Bitmap getCropBitmap() {
+		Bitmap bitmap = ((BitmapDrawable)bgSource.getDrawable()).getBitmap();
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(),Bitmap.Config.ARGB_8888);  
+        Canvas canvas = new Canvas(output);
+        Log.d("bitmap conf:", "bitmap.getWidth:"+bitmap.getWidth()+"bitmap.getHeight:"+bitmap.getHeight());
+  
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0,0,bitmap.getWidth(), bitmap.getHeight());
+  
+        paint.setAntiAlias( true);
+        paint.setFilterBitmap( true);
+        paint.setDither( true);
+        canvas.drawARGB( 0, 0, 0, 0);
+        paint.setColor( color);
+        //在画布上绘制一个圆 
+        int scale = 1;
+//        		bitmap.getWidth()/(bgSource.getRight()-bgSource.getLeft());
+        
+        Rect rect1=new Rect(scale*(cropShelter.getLeft()),
+        		scale*(cropShelter.getTop()), 
+        		scale*(cropShelter.getRight()), 
+        		scale*(cropShelter.getBottom()));
+		canvas.drawRect(rect1,
+        		paint);
+		System.out.println("bg:"+new Rect(
+				bgSource.getLeft(),
+				bgSource.getTop(),
+				bgSource.getRight(),
+				bgSource.getBottom()
+				
+				));
+		
+		System.out.println(rect1);
+        paint.setXfermode( new PorterDuffXfermode(Mode.SRC_IN));  
+        canvas.drawBitmap( bitmap, rect, rect, paint);  
+        return output;  
+    }  
+	
 
 }

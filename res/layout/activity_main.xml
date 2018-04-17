@@ -12,7 +12,22 @@
         android:id="@+id/crop"
         android:background="#f00"
         android:layout_width="match_parent"
-        
         android:layout_height="match_parent"/>
+    
+    <Button android:id="@+id/btn_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ok"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="onOKClick"
+        />
+    
+    <include layout="@layout/result"
+        android:id="@+id/rl_result"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
 </RelativeLayout>
