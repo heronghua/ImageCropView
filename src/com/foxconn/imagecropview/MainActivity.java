@@ -20,8 +20,6 @@ public class MainActivity extends Activity {
 		this.cropView.setResource(R.drawable.android);
 		this.resultIV = (ImageView) findViewById(R.id.iv_result);
 		
-		cropView.setRatio(1);
-	
 	}
 	
 	public void onOKClick(View view){

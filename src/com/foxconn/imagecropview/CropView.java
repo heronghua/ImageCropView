@@ -105,7 +105,9 @@ public class CropView extends FrameLayout {
 		super.onFinishInflate();
 		this.addView(bgSource);
 		this.cropShelter.setBackgroundResource(R.drawable.ic_crop_shelter);
-
+		Bitmap bitmap = ((BitmapDrawable)cropShelter.getBackground()).getBitmap();
+		setRatio(bitmap.getWidth()/bitmap.getHeight());
+		
 		LayoutParams lp = new LayoutParams(400, LayoutParams.WRAP_CONTENT);
 		lp.gravity = Gravity.CENTER;
 		this.addView(cropShelter, lp);
