@@ -114,7 +114,7 @@ public class CropView extends FrameLayout {
 	}
 	
 	private int downX,downY,preMoveX,preMoveY;
-
+	private boolean actionMoved;
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
@@ -122,6 +122,7 @@ public class CropView extends FrameLayout {
 				cropShelter.getRight() + FINGER_RADIUS, cropShelter.getBottom() + FINGER_RADIUS);
 
 		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			actionMoved = false;
 			downX = (int) event.getX();
 			downY = (int) event.getY();
 			
@@ -154,6 +155,8 @@ public class CropView extends FrameLayout {
 		}
 		
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
+			actionMoved = true;
+			
 			//點幾點在周圍，拉伸裁剪框
 			if (scalable) {
 				scale(event);
@@ -182,6 +185,9 @@ public class CropView extends FrameLayout {
 		}
 		
 		if (MotionEvent.ACTION_UP==event.getAction()) {
+			if (!actionMoved&&Math.abs(downX-event.getX())<10) {
+				performClick();
+			}
 			preMoveX = 0 ;
 			preMoveY = 0 ;
 		}
