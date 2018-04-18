@@ -174,9 +174,41 @@ public class CropView extends FrameLayout {
 				float deltY=event.getY()-preMoveY;
 				
 				cropShelter.setLeft((int) (cropShelter.getLeft()+deltX));
-				cropShelter.setRight((int) (cropShelter.getRight()+deltX));
 				cropShelter.setTop((int) (cropShelter.getTop()+deltY));
-				cropShelter.setBottom((int) (cropShelter.getBottom()+deltY));
+				
+				
+				
+				cropShelter.setRight((int) (cropShelter.getLeft()+cropShelter.getMeasuredWidth()));
+				cropShelter.setBottom((int) (cropShelter.getTop()+cropShelter.getMeasuredHeight()));
+				
+				
+				
+				if (cropShelter.getLeft()<0) {
+					cropShelter.setLeft(0);
+					cropShelter.setRight(cropShelter.getLeft()+cropShelter.getMeasuredWidth());
+				}
+				
+				if (cropShelter.getRight()>bgSource.getRight()) {
+					cropShelter.setRight(bgSource.getRight());
+					cropShelter.setLeft(cropShelter.getRight()-cropShelter.getMeasuredWidth());
+				}
+				
+				
+				if (cropShelter.getTop()<0) {
+					cropShelter.setTop(0);
+					cropShelter.setBottom(cropShelter.getTop()+cropShelter.getMeasuredHeight());
+				}
+				Log.d("sdfasdfa", cropShelter.getBottom()+":"+bgSource.getBottom());
+				if (cropShelter.getBottom()>bgSource.getBottom()) {
+					cropShelter.setBottom(bgSource.getBottom());
+					cropShelter.setTop(cropShelter.getBottom()-cropShelter.getMeasuredHeight());
+				}
+				
+//				if (cropShelter.getBottom()>bgSource.getBottom()) {
+//					cropShelter.setBottom(bgSource.getBottom());
+//					cropShelter.setTop(cropShelter.getBottom()-cropShelter.getMeasuredHeight());
+//				}
+				
 				
 				preMoveX=(int) event.getX();
 				preMoveY=(int) event.getY();
@@ -285,7 +317,7 @@ public class CropView extends FrameLayout {
         		paint);
 		
         paint.setXfermode( new PorterDuffXfermode(Mode.SRC_IN));  
-        canvas.drawBitmap( bitmap, rect, rect, paint);  
+        canvas.drawBitmap( bitmap, rect, rect, paint);
         return output;  
     }  
 	
