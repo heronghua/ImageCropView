@@ -2,23 +2,19 @@ package com.foxconn.imagecropview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 public class CropView extends FrameLayout {
 
@@ -43,6 +39,7 @@ public class CropView extends FrameLayout {
 	private static final int FINGER_RADIUS = 40;
 
 	private int currentState = NONE;
+	private boolean scalable;
 
 	public CropView(Context context) {
 		super(context);
@@ -116,7 +113,6 @@ public class CropView extends FrameLayout {
 	
 	private int downX,downY,preMoveX,preMoveY;
 
-	private Canvas cavas;
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
@@ -150,7 +146,6 @@ public class CropView extends FrameLayout {
 				if (innerRect.contains(downX, downY)){
 					this.currentState += CENTER_MOVE;
 				}
-				test();
 
 			}
 
@@ -158,7 +153,9 @@ public class CropView extends FrameLayout {
 		
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
 			//點幾點在周圍，拉伸裁剪框
-			scale(event);
+			if (scalable) {
+				scale(event);
+			}
 			
 			//點幾點在中間 移動裁剪框
 			if(currentState == CENTER_MOVE){
@@ -188,6 +185,15 @@ public class CropView extends FrameLayout {
 		}
 
 		return true;
+	}
+	
+	public void setScalable(boolean scalable) {
+		this.scalable = scalable;
+	}
+	
+	public void setRatio(float mRatio) {
+		this.mRatio = mRatio;
+		invalidate();
 	}
 
 	private void scale(MotionEvent event) {
@@ -247,14 +253,6 @@ public class CropView extends FrameLayout {
 			cropShelter.setBottom((int)event.getY());
 		}
 	}
-
-	private void test() {
-//		toast("" + currentState);
-	}
-
-	private void toast(String msg) {
-		Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-	}
 	
 	public Bitmap getCropBitmap() {
 		Bitmap bitmap = ((BitmapDrawable)bgSource.getDrawable()).getBitmap();
@@ -271,29 +269,23 @@ public class CropView extends FrameLayout {
         paint.setDither( true);
         canvas.drawARGB( 0, 0, 0, 0);
         paint.setColor( color);
-        //在画布上绘制一个圆 
-        int scale = 1;
-//        		bitmap.getWidth()/(bgSource.getRight()-bgSource.getLeft());
         
-        Rect rect1=new Rect(scale*(cropShelter.getLeft()),
-        		scale*(cropShelter.getTop()), 
-        		scale*(cropShelter.getRight()), 
-        		scale*(cropShelter.getBottom()));
-		canvas.drawRect(rect1,
+		canvas.drawRect(new Rect(cropShelter.getLeft(),
+        		cropShelter.getTop(), 
+        		cropShelter.getRight(), 
+        		cropShelter.getBottom()),
         		paint);
-		System.out.println("bg:"+new Rect(
-				bgSource.getLeft(),
-				bgSource.getTop(),
-				bgSource.getRight(),
-				bgSource.getBottom()
-				
-				));
 		
-		System.out.println(rect1);
         paint.setXfermode( new PorterDuffXfermode(Mode.SRC_IN));  
         canvas.drawBitmap( bitmap, rect, rect, paint);  
         return output;  
     }  
 	
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		Bitmap bmp=((BitmapDrawable)bgSource.getDrawable()).getBitmap();
+		setMeasuredDimension(bmp.getWidth(), bmp.getHeight());
+	}
 
 }
