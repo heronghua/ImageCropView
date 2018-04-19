@@ -2,12 +2,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.foxconn.imagecropview.MainActivity" >
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.foxconn.imagecropview.CropView
         android:id="@+id/crop"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:background="@drawable/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:crop_shelter="@drawable/ic_crop_shelter"
+        />
     
     <Button 
         android:id="@+id/btn_ok"

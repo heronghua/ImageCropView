@@ -1,6 +1,7 @@
 package com.foxconn.imagecropview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -8,19 +9,17 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 public class CropView extends FrameLayout {
 
 	private View cropShelter;
-
-	private ImageView bgSource;
 
 	private static final int NONE = 0;
 	private static final int SCALE_TOP = 1;
@@ -40,6 +39,8 @@ public class CropView extends FrameLayout {
 
 	private int currentState = NONE;
 	private boolean scalable;
+	
+	private Drawable cropShelterBg;
 
 	public CropView(Context context) {
 		super(context);
@@ -51,15 +52,14 @@ public class CropView extends FrameLayout {
 		init(context, attrs);
 	}
 
-	public void setResource(int drawable) {
-		this.bgSource.setImageResource(drawable);
-	}
-
 	private void init(Context context, AttributeSet attrs) {
-		this.bgSource = new ImageView(context);
+		
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CropView);
+		cropShelterBg=a.getDrawable(R.styleable.CropView_crop_shelter);
+		a.recycle();
+		
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		lp.gravity = Gravity.CENTER;
-		this.bgSource.setLayoutParams(lp);
 
 		this.cropShelter = new View(context)
 		{
@@ -103,12 +103,16 @@ public class CropView extends FrameLayout {
 	@Override
 	protected void onFinishInflate() {
 		super.onFinishInflate();
-		this.addView(bgSource);
-		this.cropShelter.setBackgroundResource(R.drawable.ic_crop_shelter);
+		
+		if (getBackground()==null) {
+			throw new IllegalArgumentException("CropView's backgroud could not be empty!");
+		}
+		
+		this.cropShelter.setBackgroundDrawable(cropShelterBg);
 		Bitmap bitmap = ((BitmapDrawable)cropShelter.getBackground()).getBitmap();
 		setRatio(bitmap.getWidth()/bitmap.getHeight());
 		
-		LayoutParams lp = new LayoutParams(400, LayoutParams.WRAP_CONTENT);
+		LayoutParams lp = new LayoutParams(bitmap.getWidth(), LayoutParams.WRAP_CONTENT);
 		lp.gravity = Gravity.CENTER;
 		this.addView(cropShelter, lp);
 	}
@@ -189,7 +193,7 @@ public class CropView extends FrameLayout {
 				}
 				
 				if (cropShelter.getRight()>getMeasuredWidth()) {
-					cropShelter.setRight(bgSource.getRight());
+					cropShelter.setRight(getMeasuredWidth());
 					cropShelter.setLeft(cropShelter.getRight()-cropShelter.getMeasuredWidth());
 				}
 				
@@ -198,9 +202,9 @@ public class CropView extends FrameLayout {
 					cropShelter.setTop(0);
 					cropShelter.setBottom(cropShelter.getTop()+cropShelter.getMeasuredHeight());
 				}
-				Log.d("sdfasdfa", cropShelter.getBottom()+":"+bgSource.getBottom());
-				if (cropShelter.getBottom()>bgSource.getBottom()) {
-					cropShelter.setBottom(bgSource.getBottom());
+				Log.d("sdfasdfa", getMeasuredHeight()+":"+getMeasuredHeight());
+				if (cropShelter.getBottom()>getMeasuredHeight()) {
+					cropShelter.setBottom(getMeasuredHeight());
 					cropShelter.setTop(cropShelter.getBottom()-cropShelter.getMeasuredHeight());
 				}
 				
@@ -295,7 +299,7 @@ public class CropView extends FrameLayout {
 	}
 	
 	public Bitmap getCropBitmap() {
-		Bitmap bitmap = ((BitmapDrawable)bgSource.getDrawable()).getBitmap();
+		Bitmap bitmap = ((BitmapDrawable)getBackground()).getBitmap();
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(),Bitmap.Config.ARGB_8888);  
         Canvas canvas = new Canvas(output);
         Log.d("bitmap conf:", "bitmap.getWidth:"+bitmap.getWidth()+"bitmap.getHeight:"+bitmap.getHeight());
@@ -324,7 +328,7 @@ public class CropView extends FrameLayout {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		Bitmap bmp=((BitmapDrawable)bgSource.getDrawable()).getBitmap();
+		Bitmap bmp=((BitmapDrawable)getBackground()).getBitmap();
 		setMeasuredDimension(bmp.getWidth(), bmp.getHeight());
 	}
 
