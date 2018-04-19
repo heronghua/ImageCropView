@@ -59,6 +59,8 @@ public class CropViewI extends View {
 		mRatio = shelterDrawableBitmap.getWidth()/shelterDrawableBitmap.getHeight();
 		shelterDrawableBitmapRect = new Rect(0,0,shelterDrawableBitmap.getWidth(),shelterDrawableBitmap.getHeight());
 		
+		resutlWidth=shelterDrawableBitmap.getWidth();
+		resultHeight = shelterDrawableBitmap.getHeight();
 	}
 	
 		
@@ -184,11 +186,11 @@ public class CropViewI extends View {
 				cropShelterRect.right += deltX;
 				cropShelterRect.bottom += deltY;
 				
-				handleOutBunds();
-				
+				handleMoveOutBunds();
 				preMoveX=(int) event.getX();
 				preMoveY=(int) event.getY();
 			}
+			
 			invalidate();
 			
 		}
@@ -204,24 +206,17 @@ public class CropViewI extends View {
 		return true;
 	}
 	
-	private void handleOutBunds() {
+	private void handleMoveOutBunds() {
 		//限制裁剪框只能在圖片裡面移動
 		if (cropShelterRect.left<0) {
 			cropShelterRect.left=0;
 			cropShelterRect.right=cropShelterRect.left + resutlWidth;
-			
-			if (cropShelterRect.right>backgroundBitmap.getWidth()) {
-				cropShelterRect.right=backgroundBitmap.getWidth();
-			}
 		}
 		
 		if (cropShelterRect.right>backgroundBitmap.getWidth()) {
 			cropShelterRect.right=backgroundBitmap.getWidth();
 			cropShelterRect.left=cropShelterRect.right-resutlWidth;
 			
-			if (cropShelterRect.left<0) {
-				cropShelterRect.left=0;
-			}
 		}
 		
 		
@@ -229,18 +224,12 @@ public class CropViewI extends View {
 			cropShelterRect.top=0;
 			cropShelterRect.bottom = cropShelterRect.top + resultHeight;
 			
-			if (cropShelterRect.bottom>backgroundBitmap.getHeight()) {
-				cropShelterRect.bottom=backgroundBitmap.getHeight();
-			}
 		}
 		
 		if (cropShelterRect.bottom>backgroundBitmap.getHeight()) {
 			cropShelterRect.bottom=backgroundBitmap.getHeight();
 			cropShelterRect.top = cropShelterRect.bottom - resultHeight;
 			
-			if (cropShelterRect.top<0) {
-				cropShelterRect.top=0;
-			}
 		}
 	}
 

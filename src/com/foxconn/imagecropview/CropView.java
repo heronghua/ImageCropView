@@ -297,8 +297,8 @@ public class CropView extends FrameLayout {
 	public Bitmap getCropBitmap() {
 		Bitmap bitmap = ((BitmapDrawable)getBackground()).getBitmap();
         return Bitmap.createBitmap(bitmap,cropShelter.getLeft(),cropShelter.getTop(), 
-        		cropShelter.getMeasuredWidth(),
-        		cropShelter.getMeasuredHeight());
+        		cropShelter.getRight(),
+        		cropShelter.getBottom());
     }  
 	
 	@Override

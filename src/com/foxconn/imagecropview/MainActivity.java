@@ -7,7 +7,7 @@ import android.widget.ImageView;
 
 public class MainActivity extends Activity {
 	
-	private CropView cropView;
+	private CropViewI cropView;
 	
 	
 	private ImageView resultIV;
@@ -16,9 +16,9 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		this.cropView = (CropView) findViewById(R.id.crop);
+		this.cropView = (CropViewI) findViewById(R.id.crop);
 //		this.cropView.setRatio(2);
-//		this.cropView.setScalable(true);
+		this.cropView.setScalable(true);
 		this.resultIV = (ImageView) findViewById(R.id.iv_result);
 		
 	}
