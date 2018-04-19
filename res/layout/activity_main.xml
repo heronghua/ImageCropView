@@ -9,8 +9,7 @@
         android:background="@drawable/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:crop_shelter="@drawable/ic_crop_shelter"
-        />
+        app:crop_shelter="@drawable/ic_crop_shelter"/>
     
     <Button 
         android:id="@+id/btn_ok"

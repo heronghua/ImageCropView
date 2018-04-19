@@ -3,10 +3,6 @@ package com.foxconn.imagecropview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -182,8 +178,8 @@ public class CropView extends FrameLayout {
 				
 				
 				
-				cropShelter.setRight((int) (cropShelter.getLeft()+cropShelter.getMeasuredWidth()));
-				cropShelter.setBottom((int) (cropShelter.getTop()+cropShelter.getMeasuredHeight()));
+				cropShelter.setRight((int) (cropShelter.getRight()+deltX));
+				cropShelter.setBottom((int) (cropShelter.getBottom()+deltY));
 				
 				
 				//限制裁剪框只能在圖片裡面移動
@@ -300,29 +296,9 @@ public class CropView extends FrameLayout {
 	
 	public Bitmap getCropBitmap() {
 		Bitmap bitmap = ((BitmapDrawable)getBackground()).getBitmap();
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(),Bitmap.Config.ARGB_8888);  
-        Canvas canvas = new Canvas(output);
-        Log.d("bitmap conf:", "bitmap.getWidth:"+bitmap.getWidth()+"bitmap.getHeight:"+bitmap.getHeight());
-  
-        final int color = 0xff424242;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0,0,bitmap.getWidth(), bitmap.getHeight());
-  
-        paint.setAntiAlias( true);
-        paint.setFilterBitmap( true);
-        paint.setDither( true);
-        canvas.drawARGB( 0, 0, 0, 0);
-        paint.setColor( color);
-        
-		canvas.drawRect(new Rect(cropShelter.getLeft(),
-        		cropShelter.getTop(), 
-        		cropShelter.getRight(), 
-        		cropShelter.getBottom()),
-        		paint);
-		
-        paint.setXfermode( new PorterDuffXfermode(Mode.SRC_IN));  
-        canvas.drawBitmap( bitmap, rect, rect, paint);
-        return output;  
+        return Bitmap.createBitmap(bitmap,cropShelter.getLeft(),cropShelter.getTop(), 
+        		cropShelter.getMeasuredWidth(),
+        		cropShelter.getMeasuredHeight());
     }  
 	
 	@Override
