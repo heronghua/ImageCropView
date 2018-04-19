@@ -235,6 +235,13 @@ public class CropViewI extends View {
 
 
 	private void scale(MotionEvent event) {
+		if (event.getX()<0
+				||event.getX()>backgroundBitmap.getWidth()
+				||event.getY()>backgroundBitmap.getHeight()
+				||event.getY()<0) {
+			return;
+		}
+		
 		if (currentState==SCALE_LEFT_TOP) {
 			cropShelterRect.left = (int)event.getX();
 			resutlWidth = (int) (cropShelterRect.right-cropShelterRect.left+0.5);
