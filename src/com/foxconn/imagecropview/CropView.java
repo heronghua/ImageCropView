@@ -182,13 +182,13 @@ public class CropView extends FrameLayout {
 				cropShelter.setBottom((int) (cropShelter.getTop()+cropShelter.getMeasuredHeight()));
 				
 				
-				
+				//限制裁剪框只能在圖片裡面移動
 				if (cropShelter.getLeft()<0) {
 					cropShelter.setLeft(0);
 					cropShelter.setRight(cropShelter.getLeft()+cropShelter.getMeasuredWidth());
 				}
 				
-				if (cropShelter.getRight()>bgSource.getRight()) {
+				if (cropShelter.getRight()>getMeasuredWidth()) {
 					cropShelter.setRight(bgSource.getRight());
 					cropShelter.setLeft(cropShelter.getRight()-cropShelter.getMeasuredWidth());
 				}
@@ -204,10 +204,10 @@ public class CropView extends FrameLayout {
 					cropShelter.setTop(cropShelter.getBottom()-cropShelter.getMeasuredHeight());
 				}
 				
-//				if (cropShelter.getBottom()>bgSource.getBottom()) {
-//					cropShelter.setBottom(bgSource.getBottom());
-//					cropShelter.setTop(cropShelter.getBottom()-cropShelter.getMeasuredHeight());
-//				}
+				if (cropShelter.getBottom()>getMeasuredHeight()) {
+					cropShelter.setBottom(getMeasuredHeight());
+					cropShelter.setTop(cropShelter.getBottom()-cropShelter.getMeasuredHeight());
+				}
 				
 				
 				preMoveX=(int) event.getX();
