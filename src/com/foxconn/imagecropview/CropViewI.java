@@ -26,6 +26,8 @@ public class CropViewI extends View {
 	private static final int SCALE_LEFT_BOTTOM = 8;
 	private static final int SCALE_RIGHT_BOTTOM = 10;
 	private static final int CENTER_MOVE = 26;
+	
+	private static final int MINIMUS_WIDTH = 200;
 
 	// width/height
 	private float mRatio = 2f;
@@ -40,6 +42,8 @@ public class CropViewI extends View {
 	private Paint paint;
 
 	private int resutlWidth, resultHeight;
+	
+	private boolean scaleSmall = false;
 
 	public CropViewI(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -64,12 +68,8 @@ public class CropViewI extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		drawShelter(canvas);
-	}
-
-	private void drawShelter(Canvas canvas) {
 		canvas.drawBitmap(shelterDrawableBitmap, shelterDrawableBitmapRect,
-				new Rect(cropShelterRect.left, cropShelterRect.top, cropShelterRect.right, cropShelterRect.bottom),
+				cropShelterRect,
 				paint);
 	}
 
@@ -151,9 +151,6 @@ public class CropViewI extends View {
 				}
 
 			}
-
-			// Toast.makeText(getContext(), currentState+"",
-			// Toast.LENGTH_SHORT).show();
 		}
 
 		if (event.getAction() == MotionEvent.ACTION_MOVE) {
@@ -161,8 +158,17 @@ public class CropViewI extends View {
 
 			// 點幾點在周圍，拉伸裁剪框
 			if (scalable && currentState != CENTER_MOVE) {
-				// TODO
-				scale(event);
+				
+				judgeIsScaleSmall(event);
+				
+				//限制縮放大小不能小於MINIMUS_WIDTH
+				if (scaleSmall&&cropShelterRect.right-cropShelterRect.left<=MINIMUS_WIDTH) {
+					//do not scale
+				}else{
+					
+					scale(event);
+				}
+				
 			}
 
 			// 點幾點在中間 移動裁剪框
@@ -201,6 +207,25 @@ public class CropViewI extends View {
 		return true;
 	}
 	
+	private void judgeIsScaleSmall(MotionEvent event) {
+		if (currentState == SCALE_LEFT_TOP||currentState == SCALE_LEFT||currentState == SCALE_LEFT_BOTTOM) {
+			scaleSmall=event.getX()>cropShelterRect.left;
+		}
+		
+		if (currentState == SCALE_RIGHT_TOP||currentState == SCALE_RIGHT||currentState == SCALE_RIGHT_BOTTOM) {
+			scaleSmall=event.getX()<cropShelterRect.right;
+		}
+		
+		if (currentState == SCALE_TOP){
+			scaleSmall=event.getY()>cropShelterRect.top;
+		}
+		
+		if (currentState == SCALE_BOTTOM){
+			scaleSmall=event.getY()<cropShelterRect.bottom;
+		}
+		
+	}
+
 	private void handleMoveOutBunds() {
 		// 限制裁剪框只能在圖片裡面移動
 		if (cropShelterRect.left < 0) {
