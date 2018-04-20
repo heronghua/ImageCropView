@@ -6,6 +6,7 @@
 
     <com.foxconn.imagecropview.CropViewI
         android:id="@+id/crop"
+        android:layout_centerInParent="true"
         android:background="@drawable/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
