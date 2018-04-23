@@ -17,8 +17,9 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		this.cropView = (CropViewI) findViewById(R.id.crop);
-//		this.cropView.setRatio(2);
+		this.cropView.setShelterRatio(2);
 		this.cropView.setScalable(true);
+		this.cropView.setBackgroundResource(R.drawable.rose);
 		this.resultIV = (ImageView) findViewById(R.id.iv_result);
 		
 	}
