@@ -7,12 +7,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-//TODO bug 待修復
 public class CropViewI extends View {
 
 	private static final int NONE = 0;
@@ -49,20 +49,25 @@ public class CropViewI extends View {
 		super(context, attrs);
 		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CropView);
 		shelterDrawableBitmap = ((BitmapDrawable) a.getDrawable(R.styleable.CropView_crop_shelter)).getBitmap();
-		backgroundBitmap = ((BitmapDrawable) getBackground()).getBitmap();
 		a.recycle();
-
+		
+		mRatio = shelterDrawableBitmap.getWidth() / shelterDrawableBitmap.getHeight();
+		shelterDrawableBitmapRect = new Rect(0, 0, shelterDrawableBitmap.getWidth(), shelterDrawableBitmap.getHeight());
+		resutlWidth = shelterDrawableBitmap.getWidth();
+		resultHeight = shelterDrawableBitmap.getHeight();
+		
+		paint = new Paint();
+	}
+	
+	@Override
+	public void setBackground(Drawable background) {
+		super.setBackground(background);
+		backgroundBitmap = ((BitmapDrawable) getBackground()).getBitmap();
 		cropShelterRect = new Rect((backgroundBitmap.getWidth() - shelterDrawableBitmap.getWidth()) / 2,
 				(backgroundBitmap.getHeight() - shelterDrawableBitmap.getHeight()) / 2,
 				(backgroundBitmap.getWidth() + shelterDrawableBitmap.getWidth()) / 2,
 				(backgroundBitmap.getHeight() + shelterDrawableBitmap.getHeight()) / 2);
 		Log.d("Crop", cropShelterRect + "");
-		paint = new Paint();
-		mRatio = shelterDrawableBitmap.getWidth() / shelterDrawableBitmap.getHeight();
-		shelterDrawableBitmapRect = new Rect(0, 0, shelterDrawableBitmap.getWidth(), shelterDrawableBitmap.getHeight());
-
-		resutlWidth = shelterDrawableBitmap.getWidth();
-		resultHeight = shelterDrawableBitmap.getHeight();
 	}
 
 	@Override
